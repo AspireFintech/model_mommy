@@ -69,6 +69,8 @@ from os.path import dirname, join
 mock_file_jpeg = join(dirname(__file__), 'mock-img.jpeg')
 mock_file_txt = join(dirname(__file__), 'mock_file.txt')
 
+from month.models import MonthField
+
 
 #TODO: improve related models handling
 def _fk_model(field):
@@ -156,6 +158,7 @@ default_mapping = {
     ManyToManyField: __m2m_generator,
 
     DateField: generators.gen_date,
+    MonthField: generators.gen_month_field,
     DateTimeField: generators.gen_datetime,
     TimeField: generators.gen_time,
 

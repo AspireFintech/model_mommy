@@ -20,6 +20,7 @@ from django.core.files.base import ContentFile
 import six
 
 from model_mommy.timezone import now
+from month import Month
 
 # Map unicode to str in Python 2.x since bytes can be used
 try:
@@ -96,6 +97,10 @@ def gen_uuid():
 
 def gen_date():
     return now().date()
+
+
+def gen_month_field():
+    return Month.from_date(gen_date())
 
 
 def gen_datetime():
