@@ -21,7 +21,7 @@ from django.db.models import (
     BooleanField, DecimalField, FloatField,
     FileField, ImageField, Field, IPAddressField,
     ForeignKey, ManyToManyField, OneToOneField)
-from aspire import (
+from aspire.models import (
     DecimalField as AspireDecimalField, PercentageField
 )
 if django.VERSION >= (1, 9):
@@ -60,7 +60,6 @@ except ImportError:
     validate_ipv46_address = validate_ipv6_address
 
 from . import generators
-from aspre
 from .exceptions import ModelNotFound, AmbiguousModelName, InvalidQuantityException, RecipeIteratorEmpty
 from .utils import import_from_str, import_if_str
 
