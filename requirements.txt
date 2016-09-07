@@ -1,2 +1,3 @@
 Django
 six
+git@github.com:AspireFintech/api.git
