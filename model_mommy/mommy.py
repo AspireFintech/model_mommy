@@ -21,6 +21,9 @@ from django.db.models import (
     BooleanField, DecimalField, FloatField,
     FileField, ImageField, Field, IPAddressField,
     ForeignKey, ManyToManyField, OneToOneField)
+from aspire import (
+    DecimalField as AspireDecimalField, PercentageField
+)
 if django.VERSION >= (1, 9):
     from django.db.models.fields.related import ReverseManyToOneDescriptor as ForeignRelatedObjectsDescriptor
     from django.db.models import UUIDField
@@ -57,6 +60,7 @@ except ImportError:
     validate_ipv46_address = validate_ipv6_address
 
 from . import generators
+from aspre
 from .exceptions import ModelNotFound, AmbiguousModelName, InvalidQuantityException, RecipeIteratorEmpty
 from .utils import import_from_str, import_if_str
 
@@ -72,7 +76,7 @@ mock_file_txt = join(dirname(__file__), 'mock_file.txt')
 from month.models import MonthField
 
 
-#TODO: improve related models handling
+# TODO: improve related models handling
 def _fk_model(field):
     try:
         return ('model', field.related_model)
@@ -82,8 +86,10 @@ foreign_key_required = [_fk_model]
 
 MAX_MANY_QUANTITY = 5
 
+
 def _valid_quantity(quantity):
     return quantity is not None and (not isinstance(quantity, int) or quantity < 1)
+
 
 def make(model, _quantity=None, make_m2m=False, **attrs):
     """
@@ -119,12 +125,15 @@ def prepare(model, _quantity=None, **attrs):
 
 make.prepare = prepare
 
+
 def _recipe(name):
     app, recipe_name = name.rsplit('.', 1)
     return import_from_str('.'.join((app, 'mommy_recipes', recipe_name)))
 
+
 def make_recipe(mommy_recipe_name, _quantity=None, **new_attrs):
     return _recipe(mommy_recipe_name).make(_quantity=_quantity, **new_attrs)
+
 
 def prepare_recipe(mommy_recipe_name, _quantity=None, **new_attrs):
     return _recipe(mommy_recipe_name).prepare(_quantity=_quantity, **new_attrs)
@@ -148,6 +157,8 @@ default_mapping = {
 
     FloatField: generators.gen_float,
     DecimalField: generators.gen_decimal,
+    PercentageField: generators.gen_decimal,
+    AspireDecimalField: generators.gen_decimal,
 
     CharField: generators.gen_string,
     TextField: generators.gen_text,
@@ -179,6 +190,7 @@ if DurationField:
 
 
 class ModelFinder(object):
+
     '''
     Encapsulates all the logic for finding a model to Mommy.
     '''
@@ -282,7 +294,8 @@ class Mommy(object):
 
     def init_type_mapping(self):
         self.type_mapping = default_mapping.copy()
-        generators_from_settings = getattr(settings, 'MOMMY_CUSTOM_FIELDS_GEN', {})
+        generators_from_settings = getattr(
+            settings, 'MOMMY_CUSTOM_FIELDS_GEN', {})
         for k, v in generators_from_settings.items():
             field_class = import_if_str(k)
             generator = import_if_str(v)
@@ -304,10 +317,14 @@ class Mommy(object):
     def _make(self, commit=True, **attrs):
         fill_in_optional = attrs.pop('_fill_optional', False)
         is_rel_field = lambda x: '__' in x
-        iterator_attrs = dict((k, v) for k, v in attrs.items() if is_iterator(v))
-        model_attrs = dict((k, v) for k, v in attrs.items() if not is_rel_field(k))
-        self.rel_attrs = dict((k, v) for k, v in attrs.items() if is_rel_field(k))
-        self.rel_fields = [x.split('__')[0] for x in self.rel_attrs.keys() if is_rel_field(x)]
+        iterator_attrs = dict((k, v)
+                              for k, v in attrs.items() if is_iterator(v))
+        model_attrs = dict((k, v)
+                           for k, v in attrs.items() if not is_rel_field(k))
+        self.rel_attrs = dict((k, v)
+                              for k, v in attrs.items() if is_rel_field(k))
+        self.rel_fields = [x.split('__')[0]
+                           for x in self.rel_attrs.keys() if is_rel_field(x)]
 
         for field in self.get_fields():
             # check for fill optional argument
@@ -326,7 +343,8 @@ class Mommy(object):
                 continue
 
             if all([field.name not in model_attrs, field.name not in self.rel_fields, field.name not in self.attr_mapping]):
-                # Django is quirky in that BooleanFields are always "blank", but have no default default.
+                # Django is quirky in that BooleanFields are always "blank",
+                # but have no default default.
                 if not field.fill_optional and (not issubclass(field.__class__, Field) or field.has_default() or (field.blank and not isinstance(field, BooleanField))):
                     continue
 
@@ -339,14 +357,17 @@ class Mommy(object):
                 if field.name not in self.rel_fields and (field.null and not field.fill_optional):
                     continue
                 else:
-                    model_attrs[field.name] = self.generate_value(field, commit)
+                    model_attrs[field.name] = self.generate_value(
+                        field, commit)
             elif callable(model_attrs[field.name]):
                 model_attrs[field.name] = model_attrs[field.name]()
             elif field.name in iterator_attrs:
                 try:
-                    model_attrs[field.name] = advance_iterator(iterator_attrs[field.name])
+                    model_attrs[field.name] = advance_iterator(
+                        iterator_attrs[field.name])
                 except StopIteration:
-                    raise RecipeIteratorEmpty('{0} iterator is empty.'.format(field.name))
+                    raise RecipeIteratorEmpty(
+                        '{0} iterator is empty.'.format(field.name))
 
         return self.instance(model_attrs, _commit=commit)
 
@@ -398,7 +419,6 @@ class Mommy(object):
                         m2m_relation.target_field_name: value
                     }
                     make(through_model, **base_kwargs)
-
 
     def _ip_generator(self, field):
         protocol = getattr(field, 'protocol', '').lower()
@@ -458,7 +478,8 @@ class Mommy(object):
         generator_attrs = get_required_values(generator, field)
 
         if field.name in self.rel_fields:
-            generator_attrs.update(filter_rel_attrs(field.name, **self.rel_attrs))
+            generator_attrs.update(
+                filter_rel_attrs(field.name, **self.rel_attrs))
 
         if not commit:
             generator = getattr(generator, 'prepare', generator)
@@ -472,7 +493,7 @@ def get_required_values(generator, field):
     If required value is a string, simply fetch the value from the field
     and return.
     '''
-    #FIXME: avoid abreviations
+    # FIXME: avoid abreviations
     rt = {}
     if hasattr(generator, 'required'):
         for item in generator.required:
@@ -490,6 +511,7 @@ def get_required_values(generator, field):
 
     return rt
 
+
 def filter_rel_attrs(field_name, **rel_attrs):
     clean_dict = {}
 
@@ -504,7 +526,7 @@ def filter_rel_attrs(field_name, **rel_attrs):
     return clean_dict
 
 
-### DEPRECATED METHODS (should be removed in the future)
+# DEPRECATED METHODS (should be removed in the future)
 def make_many(model, quantity=None, **attrs):
     msg = "make_many is deprecated. You should use make with _quantity parameter."
     warnings.warn(msg, DeprecationWarning)
