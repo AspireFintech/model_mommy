@@ -22,7 +22,7 @@ from django.db.models import (
     FileField, ImageField, Field, IPAddressField,
     ForeignKey, ManyToManyField, OneToOneField)
 from aspire.models import (
-    DecimalField as AspireDecimalField, PercentageField
+    AmountField, PercentageField
 )
 if django.VERSION >= (1, 9):
     from django.db.models.fields.related import ReverseManyToOneDescriptor as ForeignRelatedObjectsDescriptor
@@ -157,7 +157,7 @@ default_mapping = {
     FloatField: generators.gen_float,
     DecimalField: generators.gen_decimal,
     PercentageField: generators.gen_decimal,
-    AspireDecimalField: generators.gen_decimal,
+    AmountField: generators.gen_decimal,
 
     CharField: generators.gen_string,
     TextField: generators.gen_text,

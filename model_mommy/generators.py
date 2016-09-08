@@ -34,17 +34,20 @@ MAX_LENGTH = 300
 # Postgres database.
 MAX_INT = 10000
 
+
 def get_content_file(content, name):
     if VERSION < (1, 4):
         return ContentFile(content)
     else:
         return ContentFile(content, name=name)
 
+
 def gen_file_field():
     name = 'mock_file.txt'
     file_path = abspath(join(dirname(__file__), name))
     with open(file_path, 'rb') as f:
         return get_content_file(f.read(), name=name)
+
 
 def gen_image_field():
     name = 'mock-img.jpeg'
@@ -158,11 +161,13 @@ def gen_byte_string(max_length=16):
     elif six.PY3:
         return bytes(generator)
 
+
 def gen_interval(interval_key='milliseconds'):
     from datetime import timedelta
     interval = gen_integer()
     kwargs = {interval_key: interval}
     return timedelta(**kwargs)
+
 
 def gen_content_type():
     from django.contrib.contenttypes.models import ContentType
