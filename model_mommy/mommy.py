@@ -60,7 +60,6 @@ except ImportError:
     validate_ipv46_address = validate_ipv6_address
 
 from . import generators
-from aspre
 from .exceptions import ModelNotFound, AmbiguousModelName, InvalidQuantityException, RecipeIteratorEmpty
 from .utils import import_from_str, import_if_str
 
